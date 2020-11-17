@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: testing-selenium-firefox
+  labels:
+    app: selenium-firefox
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: selenium-firefox
+  template:
+    metadata:
+      labels:
+        app: selenium-firefox
+    spec:
+      containers:
+        - name: selenium-firefox
+          image: kostcker/local-selenium-firefox
+          ports:
+            - containerPort: 4444

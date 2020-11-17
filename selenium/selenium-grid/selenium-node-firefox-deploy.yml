@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: selenium-node-firefox-deploy
+  labels:
+    app: selenium-node-firefox
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: selenium-node-firefox
+  template:
+    metadata:
+      labels:
+        app: selenium-node-firefox
+    spec:
+      containers:
+        - name: selenium-node-firefox
+          image: kostcker/selenium-node-firefox
+          ports:
+            - containerPort: 2222
+          env:
+          - name: HUB_PORT_4444_TCP_ADDR
+            value: "selenium-hub-service"
+          - name: HUB_PORT_4444_TCP_PORT
+            value: "4444"

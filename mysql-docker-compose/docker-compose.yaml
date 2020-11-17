@@ -1,0 +1,35 @@
+version: '3'
+services:
+  db:
+    container_name: db-host
+    image: "mysql:8.0.21"
+    environment:
+      MYSQL_ROOT_PASSWORD: Pass123
+      MYSQL_USER: lukasz
+      MYSQL_NAME: mydb
+      MYSQL_PASSWORD: Password123!
+    volumes:
+      - ~/projects/my-mysql:/var/lib/mysql
+      - ~/projects/mysql/conf.d/:/etc/mysql/conf.d
+      - ~/projects/compose-example/scripts:/docker-entrypoint-initdb.d
+    ports:
+      - "3306:3306"
+    command: --init-file=/docker-entrypoint-initdb.d/000_init.sql
+  app:
+    image: "hm:latest"
+    container_name: app-host
+    depends_on:
+      - "db"
+    volumes:
+      - ./:/tools
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      MYSQL_DB_USER: lukasz
+      MYSQL_DB_PASSWORD: Password123!
+      MYSQL_DB_NAME: mydb
+      MYSQL_DB_PORT: 3306
+      MYSQL_DB_HOST: db
+    restart: always
+    command: --config ./cfg --targets ./targets.txt

@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: selenium-node-chrome-deploy
+  labels:
+    app: selenium-node-chrome
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: selenium-node-chrome
+  template:
+    metadata:
+      labels:
+        app: selenium-node-chrome
+    spec:
+      containers:
+        - name: selenium-node-chrome
+          image: kostcker/selenium-node-chrome
+          ports:
+            - containerPort: 2221
+          env:
+          - name: HUB_PORT_4444_TCP_ADDR
+            value: "selenium-hub-service"
+          - name: HUB_PORT_4444_TCP_PORT
+            value: "4444"

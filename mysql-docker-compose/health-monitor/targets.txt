@@ -1,0 +1,6 @@
+localik2;ping -c 1 127.0.0.1 | grep -Eo "0% packet loss";0% packet loss
+localhost;ping -c 2 localhost | grep -Eo "0% packet loss";0% packet loss
+google.com;ping -c 1 goaogle.com | grep -Eo "0% packet loss";0% packet loss
+wp.pl;GET http://www.wp.pl;200
+google.com;GET http://www.google.com;200
+onet.pl;GET http://localhost;200
