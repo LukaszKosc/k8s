@@ -1,0 +1,114 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgresql-deployment
+  labels:
+    app: postgresql-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgresql-db
+  template:
+    metadata:
+      labels:
+        app: postgresql-db
+    spec:
+      volumes:
+        - name: postgres-storage
+          persistentVolumeClaim:
+            claimName: postgresql-pvc
+# Get secret via volumeMounts
+#        - name: postgres-secret-any
+#          secret:
+#            secretName: postgresql-secret
+#            defaultMode: 0400
+      containers:
+        - name: postgresql-container
+           # approach #1
+          envFrom:
+            - secretRef:
+                name: postgresql-secret
+          # approach #1
+#          env:
+#            - name: POSTGRES_USER
+#              valueFrom:
+#                secretKeyRef:
+#                  name: postgresql-secret
+#                  key: POSTGRES_USER
+#            - name: POSTGRES_PASSWORD
+#              valueFrom:
+#                secretKeyRef:
+#                  name: postgresql-secret
+#                  key: POSTGRES_PASSWORD
+#            - name: POSTGRES_DB
+#              valueFrom:
+#                secretKeyRef:
+#                  name: postgresql-secret
+#                  key: POSTGRES_DB
+          image: postgres:latest
+          ports:
+            - containerPort: 5432
+              name: postgresql-db
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgres-storage
+# Get secret via volumeMounts
+#            - name: postgres-secret-any
+#              mountPath: /etc/postgres-secret-any
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgresql-secret
+  labels:
+    app: postgresql-db
+data:
+  POSTGRES_PASSWORD: UGFzczEyMyE=
+  POSTGRES_USER: cG9zdGdyZXM=
+  POSTGRES_DB: bXlkYg==
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresql-service
+  labels:
+    app: postgresql-db
+spec:
+  #  type: LoadBalancer
+  #  type: ClusterIP
+  type: NodePort
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
+      nodePort: 31333
+  selector:
+    app: postgresql-db
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgresql-pv
+  labels:
+    app: postgresql-db
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: manual
+  hostPath:
+    path: /mnt/postgres-db
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgresql-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: manual
